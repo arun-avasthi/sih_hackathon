@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JalRakshak - Water Quality Monitoring Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="wave wave1"></div>
+        <div class="wave wave2"></div>
+        <div class="wave wave3"></div>
+        <div class="particles"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header glass-morphism">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo -->
+                <div class="logo">
+                    <div class="logo-icon">
+                        <div class="water-drop"></div>
+                    </div>
+                    <div class="logo-text">
+                        <h1>JalRakshak</h1>
+                        <p>Water Body Monitoring Dashboard</p>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li><a href="#dashboard" class="nav-link active" data-section="dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a></li>
+                        <li><a href="#map" class="nav-link" data-section="map">
+                            <i class="fas fa-map-marked-alt"></i> Live Map
+                        </a></li>
+                        <li><a href="#reports" class="nav-link" data-section="reports">
+                            <i class="fas fa-chart-bar"></i> Reports
+                        </a></li>
+                        <li><a href="#alerts" class="nav-link" data-section="alerts">
+                            <i class="fas fa-exclamation-triangle"></i> Alerts
+                        </a></li>
+                        <li><a href="#citizen" class="nav-link" id="citizenAppBtn">
+                            <i class="fas fa-users"></i> Citizen App
+                        </a></li>
+                    </ul>
+                </nav>
+
+                <!-- Status & Controls -->
+                <div class="header-controls">
+                    <div class="status-indicators">
+                        <div class="status-item">
+                            <div class="status-dot online"></div>
+                            <span>Live Data Stream</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-dot system"></div>
+                            <span>System Online</span>
+                        </div>
+                    </div>
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="last-updated" id="lastUpdated">
+                        Last Updated: Tuesday 23 September, 2025 at 7:02 am
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Key Metrics -->
+            <section class="metrics-section">
+                <div class="metrics-grid">
+                    <!-- Water Quality Index -->
+                    <div class="metric-card glass-morphism" data-metric="wqi">
+                        <div class="metric-header">
+                            <div class="metric-icon">
+                                <i class="fas fa-tint"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Water Quality Index</h3>
+                                <span class="metric-subtitle">Overall Health Score</span>
+                            </div>
+                        </div>
+                        <div class="metric-value">
+                            <span class="value" id="wqiValue">72</span>
+                            <span class="unit">WQI</span>
+                            <span class="trend positive">+5.2%</span>
+                        </div>
+                        <div class="metric-chart">
+                            <canvas id="wqiChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Healthy Water Bodies -->
+                    <div class="metric-card glass-morphism" data-metric="healthy">
+                        <div class="metric-header">
+                            <div class="metric-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Healthy Bodies</h3>
+                                <span class="metric-subtitle">Water Quality Status</span>
+                            </div>
+                        </div>
+                        <div class="metric-value">
+                            <span class="value" id="healthyCount">15</span>
+                            <span class="unit">of 25</span>
+                            <span class="trend positive">+2</span>
+                        </div>
+                        <div class="status-breakdown">
+                            <div class="status-item">
+                                <div class="status-dot healthy"></div>
+                                <span>Healthy: <strong>15</strong></span>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-dot moderate"></div>
+                                <span>Moderate: <strong>8</strong></span>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-dot critical"></div>
+                                <span>Critical: <strong>2</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Alerts -->
+                    <div class="metric-card glass-morphism" data-metric="alerts">
+                        <div class="metric-header">
+                            <div class="metric-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>Active Alerts</h3>
+                                <span class="metric-subtitle">Critical Issues</span>
+                            </div>
+                        </div>
+                        <div class="metric-value">
+                            <span class="value critical" id="alertCount">3</span>
+                            <span class="unit">Critical</span>
+                            <span class="trend negative">+1</span>
+                        </div>
+                        <button class="quick-action-btn" onclick="showAllAlerts()">
+                            <i class="fas fa-eye"></i> View All
+                        </button>
+                    </div>
+
+                    <!-- AI Predictions -->
+                    <div class="metric-card glass-morphism" data-metric="ai">
+                        <div class="metric-header">
+                            <div class="metric-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="metric-info">
+                                <h3>AI Predictions</h3>
+                                <span class="metric-subtitle">Next 24 Hours</span>
+                            </div>
+                        </div>
+                        <div class="metric-value">
+                            <span class="prediction-text">2 areas at risk</span>
+                            <span class="confidence">95% confidence</span>
+                        </div>
+                        <div class="prediction-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 95%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Dashboard Content -->
+            <section class="dashboard-content">
+                <div class="content-grid">
+                    <!-- Map Section -->
+                    <div class="map-section glass-morphism">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-globe-asia"></i>
+                                Real-time Monitoring Map
+                            </h2>
+                            <div class="map-controls">
+                                <button class="control-btn" id="heatmapToggle">
+                                    <i class="fas fa-fire"></i> Heatmap
+                                </button>
+                                <button class="control-btn" id="clusterToggle">
+                                    <i class="fas fa-layer-group"></i> Clusters
+                                </button>
+                                <button class="control-btn" id="criticalFilter">
+                                    <i class="fas fa-filter"></i> Critical Only
+                                </button>
+                            </div>
+                        </div>
+                        <div class="map-container">
+                            <div id="map"></div>
+                        </div>
+                        <div class="map-legend">
+                            <div class="legend-item">
+                                <div class="marker-sample healthy"></div>
+                                <span>Healthy (pH 6.5-8.5)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="marker-sample moderate"></div>
+                                <span>Moderate (pH 5.5-6.5)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="marker-sample critical"></div>
+                                <span>Critical (pH <5.5)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Panels -->
+                    <div class="data-panels">
+                        <!-- Real-time Readings -->
+                        <div class="data-panel glass-morphism">
+                            <div class="panel-header">
+                                <h3>
+                                    <i class="fas fa-chart-line"></i>
+                                    Real-time Readings
+                                </h3>
+                                <button class="refresh-btn" onclick="refreshData()">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                            <div class="readings-grid">
+                                <div class="reading-card">
+                                    <div class="reading-icon ph">
+                                        <i class="fas fa-vial"></i>
+                                    </div>
+                                    <div class="reading-data">
+                                        <span class="reading-label">pH Level</span>
+                                        <span class="reading-value" id="phValue">6.8</span>
+                                        <span class="reading-status good">Normal</span>
+                                    </div>
+                                    <div class="reading-chart">
+                                        <canvas id="phMiniChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="reading-card">
+                                    <div class="reading-icon oxygen">
+                                        <i class="fas fa-lungs"></i>
+                                    </div>
+                                    <div class="reading-data">
+                                        <span class="reading-label">Dissolved O₂</span>
+                                        <span class="reading-value" id="oxygenValue">5.4</span>
+                                        <span class="reading-unit">mg/L</span>
+                                        <span class="reading-status moderate">Low</span>
+                                    </div>
+                                    <div class="reading-chart">
+                                        <canvas id="oxygenMiniChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="reading-card">
+                                    <div class="reading-icon turbidity">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="reading-data">
+                                        <span class="reading-label">Turbidity</span>
+                                        <span class="reading-value" id="turbidityValue">21.3</span>
+                                        <span class="reading-unit">NTU</span>
+                                        <span class="reading-status warning">High</span>
+                                    </div>
+                                    <div class="reading-chart">
+                                        <canvas id="turbidityMiniChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="reading-card">
+                                    <div class="reading-icon temperature">
+                                        <i class="fas fa-thermometer-half"></i>
+                                    </div>
+                                    <div class="reading-data">
+                                        <span class="reading-label">Temperature</span>
+                                        <span class="reading-value" id="tempValue">24.2</span>
+                                        <span class="reading-unit">°C</span>
+                                        <span class="reading-status good">Normal</span>
+                                    </div>
+                                    <div class="reading-chart">
+                                        <canvas id="tempMiniChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Critical Alerts -->
+                        <div class="data-panel glass-morphism">
+                            <div class="panel-header">
+                                <h3>
+                                    <i class="fas fa-bell"></i>
+                                    Critical Alerts
+                                </h3>
+                                <span class="alert-badge" id="alertBadge">3 Active</span>
+                            </div>
+                            <div class="alerts-container" id="alertsContainer">
+                                <!-- Alerts will be populated by JavaScript -->
+                            </div>
+                        </div>
+
+                        <!-- AI Predictions -->
+                        <div class="data-panel glass-morphism">
+                            <div class="panel-header">
+                                <h3>
+                                    <i class="fas fa-robot"></i>
+                                    AI Contamination Predictions
+                                </h3>
+                                <div class="ai-status">
+                                    <div class="ai-indicator"></div>
+                                    <span>ML Active</span>
+                                </div>
+                            </div>
+                            <div class="predictions-container" id="predictionsContainer">
+                                <!-- Predictions will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 24-Hour Trends Section -->
+            <section class="trends-section glass-morphism">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-chart-area"></i>
+                        24-Hour Water Quality Trends
+                    </h2>
+                    <div class="trends-controls">
+                        <select class="time-selector" id="trendTimeframe">
+                            <option value="24h">Last 24 Hours</option>
+                            <option value="7d">Last 7 Days</option>
+                            <option value="30d">Last 30 Days</option>
+                        </select>
+                        <button class="control-btn" onclick="refreshTrends()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="trends-content">
+                    <!-- Data Table -->
+                    <div class="trends-table-container">
+                        <div class="table-header">
+                            <h3>Latest Readings (12 Hours)</h3>
+                        </div>
+                        <div class="trends-table" id="trendsTable">
+                            <div class="table-header-row">
+                                <div class="table-cell">Time</div>
+                                <div class="table-cell">pH Level</div>
+                                <div class="table-cell">Dissolved O₂</div>
+                                <div class="table-cell">Turbidity</div>
+                                <div class="table-cell">Status</div>
+                            </div>
+                            <div class="table-body" id="trendsTableBody">
+                                <!-- Data rows will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trend Charts -->
+                    <div class="trends-charts">
+                        <div class="trend-chart">
+                            <h4>pH Level Trend</h4>
+                            <canvas id="phTrendChart"></canvas>
+                        </div>
+                        <div class="trend-chart">
+                            <h4>Oxygen Level Trend</h4>
+                            <canvas id="oxygenTrendChart"></canvas>
+                        </div>
+                        <div class="trend-chart">
+                            <h4>Turbidity Trend</h4>
+                            <canvas id="turbidityTrendChart"></canvas>
+                        </div>
+                        <div class="trend-chart">
+                            <h4>Overall Quality Index</h4>
+                            <canvas id="qualityTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Citizen App Modal -->
+    <div id="citizenModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content glass-morphism">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-mobile-alt"></i>
+                    JalRakshak Citizen App
+                </h2>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="location-section">
+                    <h3>Select Your Area</h3>
+                    <select id="locationSelect" class="location-dropdown">
+                        <option value="">Choose your area</option>
+                        <option value="connaught-place">Connaught Place</option>
+                        <option value="karol-bagh">Karol Bagh</option>
+                        <option value="lajpat-nagar">Lajpat Nagar</option>
+                        <option value="dwarka">Dwarka</option>
+                    </select>
+                </div>
+                <div class="area-status" id="areaStatus">
+                    <div class="status-placeholder">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p>Please select your area to view water quality status</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading water quality data...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
